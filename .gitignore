@@ -1,0 +1,5 @@
+node_modules
+dist
+.wrangler
+frontend/.env.local
+.DS_Store
