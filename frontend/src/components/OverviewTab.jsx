@@ -24,6 +24,17 @@ export default function OverviewTab({ mx, money, goTab, ym }) {
   const wantCost = itemsWant.reduce((s, i) => s + toMXN(num(i.price) * (num(i.qty) || 1), i.cur, rate), 0);
   const placesBeen = state.places.filter((p) => p.status === "been").length;
 
+  // Trip budget: settings.trip is written by cdmx.kasion.dev (its rate = THB per 1 MXN).
+  const trip = state.settings.trip;
+  const tripPlan = trip ? num(trip.countA) * num(trip.costA) + num(trip.countB) * num(trip.costB) : 0;
+  const tripPlaces = state.places
+    .filter((p) => p.status === "been" && (p.date || "").slice(0, 7) === ym && num(p.cost))
+    .reduce((s, p) => s + num(p.cost), 0);
+  const tripLogs = byCat["เที่ยว"] || 0;
+  const tripSpent = tripLogs + tripPlaces;
+  const tripLeft = tripPlan - tripSpent;
+  const toTHB = (mxn) => (rate ? mxn / rate : mxn * num(trip?.rate));
+
   const upcoming = useMemo(() => {
     const ev = [];
     for (const h of state.homes) {
@@ -126,6 +137,37 @@ export default function OverviewTab({ mx, money, goTab, ym }) {
         <Tap onClick={() => goTab("places")} label="ที่เที่ยวไปแล้ว" value={`${placesBeen} ที่`} hint={`อยากไปอีก ${state.places.length - placesBeen}`} />
         <Tap onClick={() => goTab("home")} label="ซิม / บริการ" value={`${state.services.length} รายการ`} />
       </div>
+
+      <Card>
+        <SectionTitle
+          right={
+            <a href="https://cdmx.kasion.dev" className="inline-flex items-center gap-1 font-semibold text-accent">
+              {trip ? "แก้แผน" : "ตั้งงบ"} <ExternalLink className="h-3 w-3" />
+            </a>
+          }
+        >
+          งบเที่ยว {ymLabel(ym)}
+        </SectionTitle>
+        {trip ? (
+          <div className="grid grid-cols-3 gap-3">
+            <Stat label="งบตามแผน" value={fmtMoney(tripPlan)} hint={fmtMoney(toTHB(tripPlan), "THB")} />
+            <Stat label="ใช้ไปแล้ว" value={fmtMoney(tripSpent)} hint={`บันทึก ${fmtMoney(tripLogs)} · สถานที่ ${fmtMoney(tripPlaces)}`} />
+            <Stat
+              label={tripLeft < 0 ? "เกินงบ" : "เหลือ"}
+              value={fmtMoney(tripLeft, "MXN", { sign: true })}
+              hint={fmtMoney(toTHB(tripLeft), "THB", { sign: true })}
+              tone={tripLeft < 0 ? STATUS_TONE.bad : STATUS_TONE.good}
+            />
+          </div>
+        ) : (
+          <div className="text-sm text-dim">
+            ยังไม่ได้ตั้งงบเที่ยว ·{" "}
+            <a href="https://cdmx.kasion.dev" className="font-semibold text-accent">
+              ตั้งงบที่ cdmx.kasion.dev
+            </a>
+          </div>
+        )}
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
