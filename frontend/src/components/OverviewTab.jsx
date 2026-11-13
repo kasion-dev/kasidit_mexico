@@ -52,6 +52,9 @@ export default function OverviewTab({ mx, money, goTab, ym }) {
       if (s.end) ev.push({ date: s.end, text: `หมด ${name}`, tab: "home" });
       if (s.dueDay && s.cycle !== "free") ev.push({ date: nextDueDate(s.dueDay), text: `ตัดเงิน ${name} ${fmtMoney(s.cost, s.cur)}`, tab: "home" });
     }
+    for (const p of state.plans) {
+      if (p.date && p.status !== "done" && p.status !== "skip") ev.push({ date: p.date, text: (p.time ? p.time + " · " : "") + p.title, tab: "plans" });
+    }
     for (const i of state.items) {
       if (i.status === "ordered" && i.date) ev.push({ date: i.date, text: `สั่ง ${i.name} (รอของ)`, tab: "items" });
     }
@@ -60,7 +63,7 @@ export default function OverviewTab({ mx, money, goTab, ym }) {
       .filter((e) => e.days != null && e.days >= -3 && e.days <= 60)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 8);
-  }, [state.homes, state.services, state.items]);
+  }, [state.homes, state.services, state.items, state.plans]);
 
   const recent = [...state.logs].sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 5);
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Boxes, CloudOff, ExternalLink, Home, LayoutDashboard, MapPin, ReceiptText, RefreshCw } from "lucide-react";
+import { Boxes, CalendarCheck, CloudOff, ExternalLink, Home, LayoutDashboard, MapPin, ReceiptText, RefreshCw } from "lucide-react";
 import { useAuth } from "./hooks/useAuth";
 import { useMexico, useMoneyLink } from "./hooks/useMexico";
 import { APP_VERSION, today } from "./lib/model";
@@ -11,9 +11,11 @@ import HomeTab from "./components/HomeTab";
 import ItemsTab from "./components/ItemsTab";
 import LogTab from "./components/LogTab";
 import PlacesTab from "./components/PlacesTab";
+import PlansTab from "./components/PlansTab";
 
 const TABS = [
   { id: "overview", label: "ภาพรวม", icon: LayoutDashboard },
+  { id: "plans", label: "แผน", icon: CalendarCheck },
   { id: "home", label: "บ้าน·ซิม", icon: Home },
   { id: "items", label: "ของ", icon: Boxes },
   { id: "log", label: "กิน·เดินทาง", icon: ReceiptText },
@@ -108,6 +110,7 @@ function Shell({ user }) {
 
       <main className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-5">
         {tab === "overview" && <OverviewTab mx={mx} money={money} goTab={goTab} ym={ym} />}
+        {tab === "plans" && <PlansTab mx={mx} />}
         {tab === "home" && <HomeTab mx={mx} />}
         {tab === "items" && <ItemsTab mx={mx} />}
         {tab === "log" && <LogTab mx={mx} money={money} />}
@@ -118,16 +121,16 @@ function Shell({ user }) {
         className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-md sm:hidden"
         aria-label="เมนูหลัก"
       >
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => goTab(t.id)}
               aria-current={tab === t.id ? "page" : undefined}
-              className={cn("flex min-h-[58px] flex-col items-center justify-center gap-1 text-[11px] font-medium transition", tab === t.id ? "text-ink" : "text-dim")}
+              className={cn("flex min-h-[58px] min-w-0 flex-col items-center justify-center gap-1 whitespace-nowrap text-[10px] font-medium tracking-tight transition", tab === t.id ? "text-ink" : "text-dim")}
             >
-              <span className={cn("grid h-7 w-12 place-items-center rounded-full transition", tab === t.id && "bg-accent/15 text-accent")}>
+              <span className={cn("grid h-7 w-11 place-items-center rounded-full transition", tab === t.id && "bg-accent/15 text-accent")}>
                 <t.icon className="h-[18px] w-[18px]" aria-hidden="true" />
               </span>
               {t.label}

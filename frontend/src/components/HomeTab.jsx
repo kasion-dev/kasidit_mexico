@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MapPin, Phone, Plus } from "lucide-react";
 import FormSheet from "./FormSheet";
-import { Button, Card, Chip, Empty, SectionTitle } from "./ui";
+import { Button, Card, Chip, Empty, LinkText, SectionTitle } from "./ui";
 import { HOME_STATUS, SERVICE_KINDS, daysUntil, intlDigits, mapsUrl, nextDueDate, serviceMonthly, waUrl } from "../lib/model";
 import { dateLabel, fmtMoney, relDays } from "../lib/format";
 
@@ -150,7 +150,7 @@ export default function HomeTab({ mx }) {
                     {h.tenantPays ? <div className="text-warn">เราจ่าย: {h.tenantPays}</div> : null}
                   </div>
                 ) : null}
-                {h.note ? <div className="mt-2 whitespace-pre-line text-xs text-faint">{h.note}</div> : null}
+                {h.note ? <LinkText text={h.note} className="mt-2 block whitespace-pre-line text-xs text-faint" /> : null}
                 {h.address ? (
                   <a
                     href={mapsUrl(h.address)}

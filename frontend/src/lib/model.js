@@ -44,6 +44,30 @@ export const LOG_CATS = [
   { id: "อื่น", label: "อื่น ๆ", money: "อื่น" },
 ];
 
+export const PLAN_STATUS = [
+  { id: "todo", label: "ต้องทำ" },
+  { id: "doing", label: "กำลังทำ" },
+  { id: "done", label: "เสร็จแล้ว" },
+  { id: "skip", label: "ยกเลิก" },
+];
+
+export const PLAN_CATS = ["บ้าน", "ซื้อของ", "เน็ต·ซิม", "เงิน", "เอกสาร", "งาน", "อื่น ๆ"];
+
+/** "label | url" or bare url per line → [{ label, url }] */
+export function parseLinks(text) {
+  return String(text || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const bar = line.lastIndexOf("|");
+      const label = bar > -1 ? line.slice(0, bar).trim() : "";
+      let url = (bar > -1 ? line.slice(bar + 1) : line).trim();
+      if (!/^(https?:|mailto:|tel:)/i.test(url)) url = url.includes("@") && !url.includes("/") ? "mailto:" + url : "https://" + url;
+      return { label, url };
+    });
+}
+
 export const TRAVEL_MODES = ["เดิน", "Metro", "Metrobús", "DiDi", "Uber", "inDrive", "แท็กซี่", "รถเมล์", "Ecobici", "อื่น ๆ"];
 
 export const PLACE_AREAS = {
@@ -64,6 +88,7 @@ export function makeBlank() {
     items: [],
     logs: [],
     places: [],
+    plans: [],
     settings: { rate: 0.5134 }, // MXN per 1 THB, used only when Money has no rate
   };
 }
@@ -81,6 +106,7 @@ export function normalize(raw) {
     items: arr(raw.items),
     logs: arr(raw.logs),
     places: arr(raw.places),
+    plans: arr(raw.plans),
     settings: { ...b.settings, ...(raw.settings || {}) },
   };
 }

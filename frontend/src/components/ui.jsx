@@ -155,3 +155,46 @@ export function Stat({ label, value, hint, tone }) {
     </div>
   );
 }
+
+// URLs (with or without scheme) and e-mail addresses inside free text.
+const LINK_RE =
+  /(https?:\/\/[^\s<]+)|(\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b)|(\b(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|mx|dev|net|org|io|app|ai|co)(?:\.[a-z]{2})?\/[^\s<]*)/gi;
+
+function hrefFor(raw) {
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.includes("@") && !raw.includes("/")) return "mailto:" + raw;
+  return "https://" + raw;
+}
+
+/** Plain text with clickable links; keeps newlines when the parent uses whitespace-pre-line. */
+export function LinkText({ text, className }) {
+  if (!text) return null;
+  const out = [];
+  let last = 0;
+  String(text).replace(LINK_RE, (m, _a, _b, _c, idx) => {
+    let url = m;
+    let tail = "";
+    while (/[).,;:!?」』]$/.test(url)) {
+      tail = url.slice(-1) + tail;
+      url = url.slice(0, -1);
+    }
+    if (idx > last) out.push(text.slice(last, idx));
+    out.push(
+      <a
+        key={idx}
+        href={hrefFor(url)}
+        target="_blank"
+        rel="noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="break-all text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
+      >
+        {url.replace(/^https?:\/\/(www\.)?/i, "")}
+      </a>
+    );
+    if (tail) out.push(tail);
+    last = idx + m.length;
+    return m;
+  });
+  if (last < text.length) out.push(text.slice(last));
+  return <span className={className}>{out}</span>;
+}
