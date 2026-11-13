@@ -30,18 +30,26 @@ async function verifyFirebaseToken(request, env) {
       audience: env.FIREBASE_PROJECT_ID,
     });
     if (typeof payload.sub !== "string") return null;
-    return { uid: payload.sub, email: typeof payload.email === "string" ? payload.email.toLowerCase() : "" };
+    return {
+      uid: payload.sub,
+      email: typeof payload.email === "string" ? payload.email.toLowerCase() : "",
+      emailVerified: payload.email_verified === true,
+    };
   } catch {
     return null;
   }
 }
 
-// Same owner rule as money.kasion.dev: only Gmail addresses containing
-// OWNER_MATCH are stored server-side. Unlike the money Worker, this one never
-// deletes rows — cleanup of the shared table stays with the money app.
-function isOwner(email, env) {
-  const needle = String(env.OWNER_MATCH || "kasidit").toLowerCase();
-  return Boolean(email) && email.includes(needle);
+// Same owner rule as money.kasion.dev (exact OWNER_EMAILS allowlist). This
+// Worker never deletes rows.
+function isOwner(auth, env) {
+  // Exact, verified email from the OWNER_EMAILS secret (comma separated).
+  // Unset secret = nobody is owner (fails closed, nothing is deleted).
+  const allow = String(env.OWNER_EMAILS || "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return auth.emailVerified === true && allow.includes(auth.email);
 }
 
 export default {
@@ -60,7 +68,7 @@ export default {
       const auth = await verifyFirebaseToken(request, env);
       if (!auth) return new Response("unauthorized", { status: 401 });
       const { uid, email } = auth;
-      const owner = isOwner(email, env);
+      const owner = isOwner(auth, env);
 
       if (request.method === "GET") {
         if (!owner) return Response.json({ value: null, updatedAt: null, owner: false });

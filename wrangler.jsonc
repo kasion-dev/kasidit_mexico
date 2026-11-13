@@ -20,8 +20,8 @@
     }
   ],
   "vars": {
-    "FIREBASE_PROJECT_ID": "kasion-dev",
-    "OWNER_MATCH": "kasidit"
+    "FIREBASE_PROJECT_ID": "kasion-dev"
+    // Owner allowlist is the OWNER_EMAILS secret (wrangler secret put OWNER_EMAILS).
   },
   "observability": { "enabled": true }
 }
